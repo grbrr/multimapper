@@ -3,13 +3,15 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Map Viewer</title>
+    <title>Two Maps Side by Side</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
         integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin="">
     <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
         integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
-    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 
 <body>
@@ -18,8 +20,6 @@
 
     <script src="config.js"></script>
     <script>
-        let syncingMap = false;
-
         function loadGoogleMapsApi() {
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&callback=initGoogleMap`;
@@ -29,56 +29,21 @@
         }
 
         function initGoogleMap() {
-            var googleMap = new google.maps.Map(document.getElementById('googleMap'), {
+            new google.maps.Map(document.getElementById('googleMap'), {
                 center: { lat: 51.107883, lng: 17.038538 },
                 zoom: 16
             });
+        }
 
-            googleMap.addListener('drag', () => {
-                if (!syncingMap) {
-                    syncingMap = true;
-                    const center = googleMap.getCenter();
-                    mapyMap.setView([center.lat(), center.lng()]);
-                    syncingMap = false;
-                }
-            });
+        function initLeafletMap() {
+            const mapyMap = L.map('mapyMap').setView([51.107883, 17.038538], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(mapyMap);
         }
 
         loadGoogleMapsApi();
-
-        const mapyMap = L.map('mapyMap').setView([51.107883, 17.038538], 16);
-
-        L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${MAPYCZ_API_KEY}`, {
-            minZoom: 0,
-            maxZoom: 19,
-        }).addTo(mapyMap);
-
-        mapyMap.on('move', () => {
-            if (!syncingMap) {
-                syncingMap = true;
-                const center = mapyMap.getCenter();
-                const googleMapCenter = new google.maps.LatLng(center.lat, center.lng);
-                googleMap.panTo(googleMapCenter);
-                syncingMap = false;
-            }
-        });
-
-        const LogoControl = L.Control.extend({
-            options: {
-                position: 'bottomleft',
-            },
-            onAdd: function (map) {
-                const container = L.DomUtil.create('div');
-                const link = L.DomUtil.create('a', '', container);
-                link.setAttribute('href', 'http://mapy.cz/');
-                link.setAttribute('target', '_blank');
-                link.innerHTML = '<img src="https://api.mapy.cz/img/api/logo.svg" />';
-                L.DomEvent.disableClickPropagation(link);
-                return container;
-            },
-        });
-
-        new LogoControl().addTo(mapyMap);
+        initLeafletMap();
     </script>
 </body>
 
