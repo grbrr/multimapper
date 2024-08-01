@@ -8,7 +8,14 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
-        }
+        },
+        show: false // Hide the window initially
+    });
+
+    // Maximize the window when it is ready to be shown
+    win.once('ready-to-show', () => {
+        win.maximize();
+        win.show();
     });
 
     // Load the index.html file
