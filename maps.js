@@ -1,9 +1,16 @@
+
+let googleMap, mapyMap;
+let isSyncing = false;
+
 // Initialize Google Maps
 function initGoogleMap() {
-    const googleMap = new google.maps.Map(document.getElementById('googleMap'), {
+    googleMap = new google.maps.Map(document.getElementById('googleMap'), {
         center: { lat: 51.107883, lng: 17.038538 }, // Coordinates for Wrocław
         zoom: 15
     });
+
+    googleMap.addListener('center_changed', syncMapyMap);
+    googleMap.addListener('zoom_changed', syncMapyMap);
 }
 
 // Load Google Maps script
@@ -17,7 +24,7 @@ function loadGoogleMapsScript() {
 // Initialize Mapy.cz
 function initMapyMap() {
     const API_KEY = MAPYCZ_API_KEY;
-    const map = L.map('mapyMap').setView([51.107883, 17.038538], 15); // Coordinates for Wrocław
+    mapyMap = L.map('mapyMap').setView([51.107883, 17.038538], 15); // Coordinates for Wrocław
 
     const tileLayers = {
         'Basic': L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}`, {
@@ -42,8 +49,8 @@ function initMapyMap() {
         }),
     };
 
-    tileLayers['Outdoor'].addTo(map);
-    L.control.layers(tileLayers).addTo(map);
+    tileLayers['Outdoor'].addTo(mapyMap);
+    L.control.layers(tileLayers).addTo(mapyMap);
 
     const LogoControl = L.Control.extend({
         options: {
@@ -60,7 +67,9 @@ function initMapyMap() {
         },
     });
 
-    new LogoControl().addTo(map);
+    new LogoControl().addTo(mapyMap);
+
+    mapyMap.on('moveend', syncGoogleMap);
 }
 
 // Load Mapy.cz script
@@ -69,6 +78,25 @@ function loadMapyScript() {
     script.src = 'https://unpkg.com/leaflet@1.9.2/dist/leaflet.js';
     script.onload = initMapyMap;
     document.head.appendChild(script);
+}
+
+// Synchronize Mapy.cz map with Google Map
+function syncMapyMap() {
+    if (isSyncing) return;
+    isSyncing = true;
+    const center = googleMap.getCenter();
+    mapyMap.setView([center.lat(), center.lng()], googleMap.getZoom());
+    isSyncing = false;
+}
+
+// Synchronize Google Map with Mapy.cz map
+function syncGoogleMap() {
+    if (isSyncing) return;
+    isSyncing = true;
+    const center = mapyMap.getCenter();
+    googleMap.setCenter({ lat: center.lat, lng: center.lng });
+    googleMap.setZoom(mapyMap.getZoom());
+    isSyncing = false;
 }
 
 // Initialize both maps
