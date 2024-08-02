@@ -12,14 +12,14 @@ function createWindow() {
         show: false // Hide the window initially
     });
 
+    // Load the index.html file
+    win.loadFile('src/index.html');
+
     // Maximize the window when it is ready to be shown
     win.once('ready-to-show', () => {
         win.maximize();
         win.show();
     });
-
-    // Load the index.html file
-    win.loadFile('index.html');
 }
 
 app.whenReady().then(createWindow);

@@ -10,7 +10,7 @@ npm install
 
 ## Usage
 
-Create a file named `config.js` in the root directory of the project with the following content:
+Create a file named `config.js` in the src directory of the project with the following content:
 
 ```js
 const GOOGLE_API_KEY = 'YOUR_GOOGLE_API_KEY';
