@@ -1,3 +1,4 @@
+const { GOOGLE_API_KEY, MAPYCZ_API_KEY } = require('./config.json');
 
 let googleMap, mapyMap;
 let isSyncing = false;
@@ -16,6 +17,7 @@ function initGoogleMap() {
 // Load Google Maps script
 function loadGoogleMapsScript() {
     const script = document.createElement('script');
+    console.log(GOOGLE_API_KEY);
     script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&callback=initGoogleMap`;
     script.async = true;
     document.head.appendChild(script);
